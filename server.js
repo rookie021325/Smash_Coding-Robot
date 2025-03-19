@@ -13,7 +13,12 @@ const app = express();
 // 使用中间件
 app.use(bodyParser.json()); // 解析JSON格式的请求体
 app.use(cors()); // 启用跨域资源共享
-app.use(express.static('.')); // 提供静态文件服务
+app.use(express.static('public')); // 提供静态文件服务
+
+// 添加路由重定向
+app.get('/', (req, res) => {
+  res.redirect('/register.html');
+});
 
 // 初始化OpenAI配置
 const openai = new OpenAI({
