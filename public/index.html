@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smash编程助手</title>
+    <style>
+        :root {
+            --primary: #00ff9d;
+            --secondary: #0a192f;
+            --accent: #64ffda;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--secondary);
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2.5em;
+            text-shadow: 0 0 10px rgba(0,255,157,0.5);
+            margin-bottom: 0.5em;
+        }
+
+        p {
+            color: #8892b0;
+            font-size: 1.1em;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        button {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            background: rgba(0,255,157,0.1);
+            box-shadow: 0 0 15px rgba(0,255,157,0.3);
+        }
+
+        .chat-box {
+            display: none;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 800px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        textarea {
+            width: 96%;
+            max-width: 97%;
+            height: 200px;
+            background: rgba(10,25,47,0.7);
+            border: 1px solid var(--accent);
+            border-radius: 5px;
+            color: #fff;
+            padding: 15px;
+            font-family: 'Fira Code', monospace;
+            margin: 15px 0;
+            resize: vertical;
+        }
+
+        .output {
+            background: rgba(10,25,47,0.7);
+            border: 1px solid var(--accent);
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+            color: #fff;
+            font-family: 'Fira Code', monospace;
+            position: relative;
+            overflow: auto;
+            max-height: 400px;
+        }
+
+        /* 添加动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-box {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* 添加新的样式 */
+        .header-container {
+            text-align: center;
+            margin: 40px auto;
+            max-width: 800px;
+        }
+
+        .header-container h1 {
+            margin-bottom: 20px;
+        }
+
+        .header-container p {
+            margin: 0;
+            line-height: 1.6;
+        }
+    </style>
+    <!-- 添加必要的字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&family=Fira+Code&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="header-container">
+        <h1>Smash编程助手</h1>
+        <p>我是Smash，你的编程助手，可以帮你重构代码、找出bug、代码注释、代码生成。</p>
+    </div>
+    
+    <div class="button-container">
+        <button onclick="toggleChatBox('refactor')">重构代码</button>
+        <button onclick="toggleChatBox('debug')">找出bug</button>
+        <button onclick="toggleChatBox('comment')">代码注释</button>
+        <button onclick="toggleChatBox('generate')">代码生成</button>
+    </div>
+    
+    <div id="refactor" class="chat-box">
+        <h3>重构代码</h3>
+        <textarea placeholder="在此输入代码..."></textarea>
+        <button onclick="processCode('refactor')">提交</button>
+        <div class="output" id="refactor-output"></div>
+    </div>
+    <div id="debug" class="chat-box">
+        <h3>找出bug</h3>
+        <textarea placeholder="在此输入代码..."></textarea>
+        <button onclick="processCode('debug')">提交</button>
+        <div class="output" id="debug-output"></div>
+    </div>
+    <div id="comment" class="chat-box">
+        <h3>代码注释</h3>
+        <textarea placeholder="在此输入代码..."></textarea>
+        <button onclick="processCode('comment')">提交</button>
+        <div class="output" id="comment-output"></div>
+    </div>
+    <div id="generate" class="chat-box">
+        <h3>代码生成</h3>
+        <textarea placeholder="在此输入代码..."></textarea>
+        <button onclick="processCode('generate')">提交</button>
+        <div class="output" id="generate-output"></div>
+    </div>
+
+    <div class="history-container">
+        <h3>历史记录</h3>
+        <ul id="history-list"></ul>
+    </div>
+
+    <script>
+        // 处理代码分析的异步函数
+        async function processCode(action) {
+            // 获取相关DOM元素
+            const textarea = document.querySelector(`#${action} textarea`);
+            const outputDiv = document.querySelector(`#${action}-output`);
+            const code = textarea.value;
+
+            // 显示加载提示
+            outputDiv.innerHTML = '<div>思考中...</div>';
+
+            try {
+                // 发送POST请求到后端API
+                const response = await fetch('http://localhost:3000/api/process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ code, action, language: 'JavaScript', description: '优化代码' }) // 示例语言和描述
+                });
+
+                // 处理响应
+                const result = await response.json();
+                outputDiv.innerHTML = result; // 显示处理结果
+            } catch (error) {
+                // 错误处理
+                outputDiv.innerHTML = '<div>Error processing request</div>';
+            }
+        }
+
+        // 切换显示/隐藏功能框的函数
+        function toggleChatBox(id) {
+            // 获取所有chat-box元素
+            const chatBoxes = document.querySelectorAll('.chat-box');
+            const selectedBox = document.getElementById(id);
+            
+            // 如果当前选中的框已经显示，则隐藏它
+            if(selectedBox.style.display === 'block') {
+                selectedBox.style.display = 'none';
+                return;
+            }
+            
+            // 隐藏所有功能框
+            chatBoxes.forEach(box => {
+                box.style.display = 'none';
+            });
+            
+            // 显示选中的功能框
+            selectedBox.style.display = 'block';
+        }
+
+        async function loadHistory() {
+            const response = await fetch('/api/history?username=test'); // 示例用户名
+            const history = await response.json();
+            const historyList = document.getElementById('history-list');
+            historyList.innerHTML = '';
+            history.forEach(record => {
+                const li = document.createElement('li');
+                li.textContent = `${record.action} - ${record.timestamp}`;
+                historyList.appendChild(li);
+            });
+        }
+        loadHistory(); // 页面加载时调用
+    </script>
+</body>
+</html> 

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户注册</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0a192f;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .register-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            width: 300px;
+        }
+        input {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #00ff9d;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #0a192f;
+            font-weight: bold;
+        }
+        .login-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .login-link a {
+            color: #00ff9d;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <h2>注册</h2>
+        <input type="text" id="username" placeholder="用户名">
+        <input type="password" id="password" placeholder="密码">
+        <input type="password" id="confirm-password" placeholder="确认密码">
+        <button onclick="register()">注册</button>
+        <div class="login-link">
+            已有账号？<a href="http://localhost:3000/login.html">立即登录</a>
+        </div>
+    </div>
+    <script>
+        async function register() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (password !== confirmPassword) {
+                alert('两次输入的密码不一致');
+                return;
+            }
+
+            const response = await fetch('http://localhost:3000/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (response.ok) {
+                alert('注册成功');
+                window.location.href = 'http://localhost:3000/login.html';
+            } else {
+                const error = await response.json();
+                alert(error.message || '注册失败');
+            }
+        }
+    </script>
+</body>
+</html>
